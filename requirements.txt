@@ -1,0 +1,9 @@
+deepforest
+torch
+opencv-python
+numpy
+pandas
+scipy
+matplotlib
+rasterio
+geopandas
