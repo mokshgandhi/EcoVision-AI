@@ -1,9 +1,9 @@
 import streamlit as st
 import cv2
 import numpy as np
-from PIL import Image
 from tree_module.analyze import analyze_forest
-import matplotlib.pyplot as plt
+
+# ---------------- PAGE CONFIG ---------------- #
 
 st.set_page_config(
     page_title="EcoVision AI",
@@ -11,102 +11,209 @@ st.set_page_config(
     layout="wide"
 )
 
+# ---------------- FOREST THEME CSS ---------------- #
+
 st.markdown("""
 <style>
-.main {
-    background-color: #0f172a;
+
+.stApp {
+    background:
+    radial-gradient(circle at 20% 20%, #0f3d1e 0%, transparent 40%),
+    radial-gradient(circle at 80% 30%, #14532d 0%, transparent 35%),
+    radial-gradient(circle at 40% 80%, #064e3b 0%, transparent 35%),
+    linear-gradient(180deg,#02140a,#041b0d,#052411,#03170d);
+    color:white;
 }
 
-h1 {
-    color: #22c55e;
+/* Upload box */
+
+section[data-testid="stFileUploader"] {
+
+    background: linear-gradient(135deg,#052e16,#064e3b);
+
+    padding:35px;
+
+    border-radius:18px;
+
+    border:2px dashed #4ade80;
+
+    box-shadow:0 12px 40px rgba(0,0,0,0.5);
 }
 
-.metric-card {
-    padding: 20px;
-    border-radius: 12px;
-    background: #111827;
+/* Image cards */
+
+.image-card {
+
+    background: rgba(12,40,25,0.75);
+
+    padding:12px;
+
+    border-radius:16px;
+
+    border:1px solid rgba(34,197,94,0.25);
+
+    backdrop-filter: blur(10px);
+
+    box-shadow:0 10px 30px rgba(0,0,0,0.35);
+
 }
+
+/* Metrics */
+
+[data-testid="stMetric"] {
+
+    background: rgba(16,46,28,0.85);
+
+    border-radius:14px;
+
+    padding:18px;
+
+    border:1px solid rgba(34,197,94,0.3);
+
+    box-shadow:0 8px 25px rgba(0,0,0,0.4);
+
+}
+
+/* Sidebar */
+
+section[data-testid="stSidebar"] {
+
+    background: linear-gradient(180deg,#052411,#03170d);
+
+}
+
+/* Footer */
+
+.footer {
+
+    text-align:center;
+
+    margin-top:40px;
+
+    padding:12px;
+
+    font-size:12px;
+
+    opacity:0.6;
+
+}
+
 </style>
 """, unsafe_allow_html=True)
 
-st.title("🌿 EcoVision AI")
-st.caption("AI Powered Forest Monitoring & Analytics")
+# ---------------- SIDEBAR ---------------- #
 
-st.divider()
+with st.sidebar:
 
-uploaded_file = st.file_uploader(
-    "Upload Forest Image",
-    type=["jpg", "png", "jpeg"]
+    st.title("EcoVision AI 🌿")
+
+    st.caption("Forest Monitoring & Environmental Analytics")
+
+    st.markdown("---")
+
+    st.markdown("### Built By")
+
+    st.write("**Team Shooting Stars**")
+
+    st.markdown("---")
+
+    st.markdown("### Features")
+
+    st.write("• Tree Detection")
+    st.write("• Density Heatmaps")
+    st.write("• Vegetation Health (NDVI)")
+    st.write("• Forest Analytics")
+
+    st.markdown("---")
+
+    st.info(
+        "Upload satellite or drone images of forests to analyze vegetation and tree distribution."
+    )
+
+# ---------------- PAGE TITLE ---------------- #
+
+st.title("Forest Analysis Dashboard")
+
+st.write("")
+
+# ---------------- FILE UPLOADER ---------------- #
+
+uploaded_files = st.file_uploader(
+    "Upload Forest Images",
+    type=["jpg", "png", "jpeg"],
+    accept_multiple_files=True
 )
 
-if uploaded_file:
+# ---------------- PROCESS IMAGES ---------------- #
 
-    file_bytes = np.asarray(bytearray(uploaded_file.read()), dtype=np.uint8)
-    image = cv2.imdecode(file_bytes, 1)
+if uploaded_files:
 
-    cv2.imwrite("temp.jpg", image)
+    for i, uploaded_file in enumerate(uploaded_files):
 
-    with st.spinner("Running AI Forest Analysis..."):
-        # Use modified analyze_forest (outputs colored cluster image)
-        result = analyze_forest("temp.jpg", n_clusters=5)
+        with st.expander(f"Analysis for: {uploaded_file.name}", expanded=(i == 0)):
 
-    st.divider()
+            file_bytes = np.asarray(bytearray(uploaded_file.read()), dtype=np.uint8)
+            image = cv2.imdecode(file_bytes, 1)
 
-    st.subheader("AI Detection Results")
+            temp_path = f"temp_{i}.jpg"
+            cv2.imwrite(temp_path, image)
 
-    col1, col2, col3 = st.columns(3)
+            with st.spinner("Running AI Forest Analysis..."):
+                result = analyze_forest(temp_path)
 
-    with col1:
-        st.image("outputs/tree_detections.png", caption="Tree Detection")
+            st.subheader("AI Detection Results")
 
-    with col2:
-        st.image("outputs/tree_density_heatmap.png", caption="Tree Density Heatmap")
+            col1, col2, col3 = st.columns(3)
 
-    with col3:
-        st.image("outputs/vegetation_health_map.png", caption="Vegetation Health (NDVI)")
+            with col1:
+                st.image("outputs/tree_detections.png", caption="Tree Detection")
 
-    st.divider()
+            with col2:
+                st.image("outputs/tree_density_heatmap.png", caption="Tree Density Heatmap")
 
-    st.subheader("Forest Analytics Dashboard")
+            with col3:
+                st.image("outputs/vegetation_health_map.png", caption="Vegetation Health (NDVI)")
 
-    c1, c2, c3, c4 = st.columns(4)
+            st.divider()
 
-    c1.metric(
-        "🌳 Tree Count",
-        result["tree_count"]
-    )
+            st.subheader("Forest Analytics Dashboard")
 
-    c2.metric(
-        "📊 Tree Density",
-        f'{result["tree_density"]:.2f} trees/km²'
-    )
+            c1, c2, c3, c4 = st.columns(4)
 
-    c3.metric(
-        "🌱 Forest Health Score",
-        result["forest_health_score"]
-    )
+            with c1:
+                st.metric(
+                    "Tree Count",
+                    result["tree_count"]
+                )
 
-    c4.metric(
-        "📏 Avg Tree Spacing",
-        f'{result["avg_tree_spacing"]:.2f} m'
-    )
+            with c2:
+                st.metric(
+                    "Tree Density (trees/km²)",
+                    f'{result["tree_density"]:.2f}'
+                )
 
-    st.divider()
+            with c3:
+                st.metric(
+                    "Forest Health Score",
+                    result["forest_health_score"]
+                )
 
-    st.subheader("Species Classification")
+            with c4:
+                st.metric(
+                    "Avg Tree Spacing",
+                    f'{result["avg_tree_spacing"]:.2f} m'
+                )
 
-    # Load the cluster-colored image
-    species_img = cv2.imread("outputs/tree_species_clusters.png")
-    species_img = cv2.cvtColor(species_img, cv2.COLOR_BGR2RGB)
-    st.image(species_img, caption="Species / Cluster Visualization")
+            st.divider()
 
-    # Create a legend for cluster colors
-    n_clusters = len(set(result["tree_clusters"]))
-    cmap = plt.cm.get_cmap('tab10', n_clusters)
-    legend_html = "<div style='display:flex; gap:10px; flex-wrap: wrap;'>"
-    for i in range(n_clusters):
-        color = tuple(int(255*c) for c in cmap(i)[:3])
-        hex_color = '#%02x%02x%02x' % color
-        legend_html += f"<div style='display:flex; align-items:center; gap:5px;'><div style='width:20px; height:20px; background:{hex_color}; border:1px solid #000'></div>Species {i}</div>"
-    legend_html += "</div>"
-    st.markdown(legend_html, unsafe_allow_html=True)
+            st.subheader("Species Classification")
+
+            st.info("Species segmentation module coming soon (integration in progress)")
+
+# ---------------- FOOTER CREDIT ---------------- #
+
+st.markdown("""
+<div class='footer'>
+EcoVision AI • Created by <b>Team Shooting Stars</b>
+</div>
+""", unsafe_allow_html=True)
