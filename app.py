@@ -1,6 +1,7 @@
 import streamlit as st
 import cv2
 import numpy as np
+import matplotlib as plt
 from tree_module.analyze import analyze_forest
 
 # ---------------- PAGE CONFIG ---------------- #
@@ -208,7 +209,21 @@ if uploaded_files:
 
             st.subheader("Species Classification")
 
-            st.info("Species segmentation module coming soon (integration in progress)")
+            # Load the cluster-colored image
+            species_img = cv2.imread("outputs/tree_species_clusters.png")
+            species_img = cv2.cvtColor(species_img, cv2.COLOR_BGR2RGB)
+            st.image(species_img, caption="Species / Cluster Visualization")
+
+            # Create a legend for cluster colors
+            n_clusters = len(set(result["tree_clusters"]))
+            cmap = plt.cm.get_cmap('tab10', n_clusters)
+            legend_html = "<div style='display:flex; gap:10px; flex-wrap: wrap;'>"
+            for i in range(n_clusters):
+                color = tuple(int(255*c) for c in cmap(i)[:3])
+                hex_color = '#%02x%02x%02x' % color
+                legend_html += f"<div style='display:flex; align-items:center; gap:5px;'><div style='width:20px; height:20px; background:{hex_color}; border:1px solid #000'></div>Species {i}</div>"
+            legend_html += "</div>"
+            st.markdown(legend_html, unsafe_allow_html=True)
 
 # ---------------- FOOTER CREDIT ---------------- #
 
