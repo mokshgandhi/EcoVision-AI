@@ -1,7 +1,9 @@
 import streamlit as st
 import cv2
 import numpy as np
+from PIL import Image
 from tree_module.analyze import analyze_forest
+import matplotlib.pyplot as plt
 
 st.set_page_config(
     page_title="EcoVision AI",
@@ -45,7 +47,8 @@ if uploaded_file:
     cv2.imwrite("temp.jpg", image)
 
     with st.spinner("Running AI Forest Analysis..."):
-        result = analyze_forest("temp.jpg")
+        # Use modified analyze_forest (outputs colored cluster image)
+        result = analyze_forest("temp.jpg", n_clusters=5)
 
     st.divider()
 
@@ -92,4 +95,18 @@ if uploaded_file:
 
     st.subheader("Species Classification")
 
-    st.info("Species segmentation module coming soon (integration in progress)")
+    # Load the cluster-colored image
+    species_img = cv2.imread("outputs/tree_species_clusters.png")
+    species_img = cv2.cvtColor(species_img, cv2.COLOR_BGR2RGB)
+    st.image(species_img, caption="Species / Cluster Visualization")
+
+    # Create a legend for cluster colors
+    n_clusters = len(set(result["tree_clusters"]))
+    cmap = plt.cm.get_cmap('tab10', n_clusters)
+    legend_html = "<div style='display:flex; gap:10px; flex-wrap: wrap;'>"
+    for i in range(n_clusters):
+        color = tuple(int(255*c) for c in cmap(i)[:3])
+        hex_color = '#%02x%02x%02x' % color
+        legend_html += f"<div style='display:flex; align-items:center; gap:5px;'><div style='width:20px; height:20px; background:{hex_color}; border:1px solid #000'></div>Species {i}</div>"
+    legend_html += "</div>"
+    st.markdown(legend_html, unsafe_allow_html=True)
