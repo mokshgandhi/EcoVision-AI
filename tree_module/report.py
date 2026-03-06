@@ -1,7 +1,7 @@
 import os
 from openai import OpenAI
 
-client = OpenAI(api_key="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")
+client = OpenAI(api_key="YOUR_OPENAI_API_KEY")
 
 def generate_forest_report(metrics):
 
