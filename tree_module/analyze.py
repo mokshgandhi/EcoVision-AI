@@ -315,9 +315,12 @@ def analyze_forest(image_path, resolution=0.5, n_clusters=5):
 
     # ---------------- AI ecological report ----------------
 
-    report = generate_forest_report(result)
+    ai_report = generate_forest_report(result)
 
-    result["analysis_report"] = report
+    if ai_report:
+        result["analysis_report"] = ai_report
+    else:
+        result["analysis_report"] = None
 
     result["outputs"] = {
 

@@ -1,42 +1,51 @@
 import os
 from openai import OpenAI
 
-client = OpenAI(api_key="YOUR_OPENAI_API_KEY")
 
 def generate_forest_report(metrics):
 
+    api_key = "YOUR_OPENAI_API_KEY"
+
+    # If no key is provided, skip report generation
+    if not api_key:
+        return None
+
+    client = OpenAI(api_key=api_key)
+
     prompt = f"""
-You are an environmental scientist analyzing forest monitoring data.
+You are a forest ecology expert analyzing forest monitoring data.
 
-Given the following forest metrics, generate a concise analytical report
-with insights and actionable forest management recommendations.
-
-Metrics:
+Forest Metrics:
 Tree Count: {metrics["tree_count"]}
 Tree Density: {metrics["tree_density"]} trees/km²
-Average Tree Spacing: {metrics["avg_tree_spacing"]} m
+Average Tree Spacing: {metrics["avg_tree_spacing"]} meters
 Forest Health Score: {metrics["forest_health_score"]}
-NDVI Vegetation Index: {metrics.get("ndvi_mean","unknown")}
+Mean NDVI: {metrics["ndvi_mean"]}
 
-Your report must contain:
+Provide a concise report including:
 
 1. Forest Health Assessment
 2. Key Observations
-3. Potential Risks
-4. Recommended Actions for Forest Management
+3. Potential Environmental Risks
+4. Recommended Forest Management Actions
 
-Keep the report under 200 words and make it professional.
+Keep the report under 200 words.
 """
 
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[
-            {"role": "system", "content": "You are a forest ecology expert."},
-            {"role": "user", "content": prompt}
-        ],
-        temperature=0.3
-    )
+    try:
 
-    report = response.choices[0].message.content
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": "You are an environmental scientist."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.3
+        )
 
-    return report
+        return response.choices[0].message.content
+
+    except Exception as e:
+
+        print("AI report generation failed:", e)
+        return None

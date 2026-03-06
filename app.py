@@ -208,7 +208,14 @@ if uploaded_files:
             st.divider()
 
             st.subheader("AI Forest Intelligence Report")
-            st.success(result["analysis_report"])
+
+            if result.get("analysis_report"):
+                st.success(result["analysis_report"])
+            else:
+                st.info(
+                    "AI report generation is disabled. "
+                    "Add your OpenAI API key to enable ecological insights."
+                )
 
             st.subheader("Species Classification")
 
