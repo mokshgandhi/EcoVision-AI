@@ -1,7 +1,12 @@
 __pycache__/
 *.pyc
+
 .DS_Store
+
 venv/
-models/*.pt
-outputs/
-.ipynb_checkpoints
+
+outputs/*
+!outputs/.gitkeep
+
+models/*
+!models/.gitkeep
