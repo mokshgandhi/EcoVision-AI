@@ -72,7 +72,10 @@ section[data-testid="stFileUploader"] {
     border:1px solid rgba(34,197,94,0.3);
 
     box-shadow:0 8px 25px rgba(0,0,0,0.4);
-
+    color:white;
+}
+*{
+    color:white;
 }
 
 /* Sidebar */
@@ -96,7 +99,7 @@ section[data-testid="stSidebar"] {
     font-size:12px;
 
     opacity:0.6;
-
+    color:white;
 }
 
 </style>
@@ -222,7 +225,7 @@ if uploaded_files:
             # Load the cluster-colored image
             species_img = cv2.imread("outputs/tree_species_clusters.png")
             species_img = cv2.cvtColor(species_img, cv2.COLOR_BGR2RGB)
-            st.image(species_img, caption="Species / Cluster Visualization")
+            st.image(species_img, caption="Species Visualization")
 
             # Create a legend for cluster colors
             n_clusters = len(set(result["tree_clusters"]))
