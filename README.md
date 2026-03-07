@@ -110,7 +110,7 @@ Analytics Pipeline\
 • NDVI Proxy\
 • Density Heatmap\
 ↓\
-Species Detection (ResNet50 embeddings + KMeans clustering)\
+Species Detection \
 ↓\
 Forest Health Metrics\
 ↓\
@@ -123,8 +123,8 @@ Visualization + AI Ecological Report
 ## AI / Machine Learning
 
 -   YOLO (Ultralytics)
--   ResNet50
--   K-Means Clustering
+-   Feature Extraction
+-   Unsupervised (Agglomeritive Clustering)
 
 ## Data Science
 
