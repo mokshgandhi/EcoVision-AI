@@ -122,9 +122,10 @@ Visualization + AI Ecological Report
 
 ## AI / Machine Learning
 
--   YOLO (Ultralytics)
+-   YOLO (Ultralytics) : RoboFlow (https://app.roboflow.com/moksh-gandhi/trees-vs3lw-hydtc/models/trees-vs3lw-hydtc/1)
 -   Feature Extraction
 -   Unsupervised (Agglomeritive Clustering)
+  
 
 ## Data Science
 
