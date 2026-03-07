@@ -173,16 +173,16 @@ if uploaded_files:
             species_counts = result.get("species_count", {})
             unique_species = list(species_counts.keys())
             n_clusters = len(unique_species)
-            cmap = plt.cm.get_cmap('tab10', n_clusters)
+            cmap = plt.get_cmap('tab10', n_clusters)
 
             legend_html = "<div style='display:flex; gap:15px; flex-wrap: wrap; margin-top:10px;'>"
             for i, species_name in enumerate(unique_species):
                 count = species_counts[species_name]
-                color = tuple(int(255*c) for c in cmap(i)[:3])
-                hex_color = '#%02x%02x%02x' % color
+                hex_color = result["labels"][species_name]
+                print(hex_color)
                 legend_html += (
                     f"<div style='display:flex; align-items:center; gap:5px;'>"
-                    f"<div style='width:20px; height:20px; background:{hex_color}; border:1px solid #000'></div>"
+                    f"<div style='width:20px; height:20px; background: rgb{hex_color}; border:1px solid #000'></div>"
                     f"{species_name} ({count})"
                     f"</div>"
                 )
