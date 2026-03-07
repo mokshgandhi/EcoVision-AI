@@ -127,7 +127,7 @@ def cluster_species(features, n_clusters=5):
 
 def assign_species_names(labels, species_list=None):
     if species_list is None:
-        species_list = ["TEAK","ROTH","SASAD","ROSEWOOD","MALABAR KINO"]
+        species_list = ["TEAK","ROTH","SADAD","ROSEWOOD","MALABAR KINO"]
     unique_labels = np.unique(labels)
     label_to_name = {lbl: species_list[i % len(species_list)] for i,lbl in enumerate(unique_labels)}
     named_labels = [label_to_name[lbl] for lbl in labels]
@@ -137,15 +137,21 @@ def annotate_species_clusters(image, predictions, named_labels, label_to_name):
     n_labels = len(label_to_name)
     cmap = plt.cm.get_cmap('tab10', max(n_labels,10))
     annotated = image.copy()
+    labels = {}
     for i, row in predictions.iterrows():
         if i >= len(named_labels): break
         xmin, ymin, xmax, ymax = map(int, [row.xmin, row.ymin, row.xmax, row.ymax])
         species_name = named_labels[i]
         label = list(label_to_name.keys())[list(label_to_name.values()).index(species_name)]
         color = tuple(int(255*c) for c in cmap(label%10)[:3])
+        labels[named_labels[i]] = (color[2],color[1],color[0])
         cv2.rectangle(annotated, (xmin,ymin),(xmax,ymax), color,2)
         #cv2.putText(annotated, species_name, (xmin,ymin-5), cv2.FONT_HERSHEY_SIMPLEX,0.5,color,2)
-    return annotated
+
+    return {
+        "annotated" : annotated,
+        "labels" : labels
+        }
 
 def count_trees_per_species(named_labels):
     counter = Counter(named_labels)
@@ -156,9 +162,9 @@ def classify_and_annotate_species(image, predictions, n_clusters=5, species_list
     features = extract_tree_features(crops)
     labels = cluster_species(features, n_clusters=n_clusters)
     named_labels, label_to_name = assign_species_names(labels, species_list)
-    annotated = annotate_species_clusters(image, predictions, named_labels, label_to_name)
+    species_annotated = annotate_species_clusters(image, predictions, named_labels, label_to_name)
     species_count = count_trees_per_species(named_labels)
-    return annotated, named_labels, species_count
+    return species_annotated, named_labels, species_count
 
 # -------------------- Biodiversity Index --------------------
 def compute_biodiversity_index(labels):
@@ -195,7 +201,7 @@ def analyze_forest(image_path, resolution=0.5):
     cv2.imwrite("outputs/tree_density_heatmap.png", heatmap)
     cv2.imwrite("outputs/vegetation_health_map.png", ndvi_map)
     cv2.imwrite("outputs/tree_detections.png", annotated)
-    cv2.imwrite("outputs/tree_species_clusters.png", species_annotated)
+    cv2.imwrite("outputs/tree_species_clusters.png", species_annotated["annotated"])
 
     # --- Result dictionary ---
     result = {
@@ -207,7 +213,8 @@ def analyze_forest(image_path, resolution=0.5):
         "ndvi_mean": float(np.mean(ndvi_raw)),
         "tree_clusters": list(named_labels),
         "biodiversity_index": biodiversity_index,
-        "species_count": species_count
+        "species_count": species_count,
+        "labels" : species_annotated["labels"]
     }
 
     ai_report = generate_forest_report(result)
