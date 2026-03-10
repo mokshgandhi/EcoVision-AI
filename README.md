@@ -256,14 +256,5 @@ EcoVision-AI generates:
 
 ------------------------------------------------------------------------
 
-# Team
-
-Developed by:
-
-**Team Shooting Stars**
-* Team Leader : Yashvi Dalsaniya
-* Team Member : Tirth Tandel
-* Team Member : Moksh Gandhi
-
 Project: **EcoVision-AI**
 
