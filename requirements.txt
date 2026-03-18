@@ -3,6 +3,7 @@ deepforest
 torch
 torchvision>=0.16
 opencv-python-headless
+opencv-python==0.0
 scikit-learn>=1.3
 scikit-image
 numpy
