@@ -1,7 +1,7 @@
 import streamlit as st
+import cv2
 import numpy as np
 import matplotlib.pyplot as plt
-from PIL import Image
 from tree_module.analyze import analyze_forest
 
 # ---------------- PAGE CONFIG ---------------- #
@@ -104,16 +104,12 @@ uploaded_files = st.file_uploader(
 if uploaded_files:
     for i, uploaded_file in enumerate(uploaded_files):
         with st.expander(f"Analysis for: {uploaded_file.name}", expanded=(i == 0)):
+            file_bytes = np.asarray(bytearray(uploaded_file.read()), dtype=np.uint8)
+            image = cv2.imdecode(file_bytes, 1)
 
-            # Load image using PIL
-            uploaded_image = Image.open(uploaded_file).convert("RGB")
-            image = np.array(uploaded_image)
-
-            # Save temp image
             temp_path = f"temp_{i}.jpg"
-            uploaded_image.save(temp_path)
+            cv2.imwrite(temp_path, image)
 
-            # Run AI analysis
             with st.spinner("Running AI Forest Analysis..."):
                 result = analyze_forest(temp_path)
 
@@ -156,15 +152,15 @@ if uploaded_files:
             # ---------------- Species Classification ---------------- #
             st.subheader("Species Classification")
 
-            # Load images using PIL
-            species_img = np.array(Image.open("outputs/tree_species_clusters.png").convert("RGB"))
-            orig_img = np.array(Image.open(temp_path).convert("RGB"))
+            # Load images
+            species_img = cv2.imread("outputs/tree_species_clusters.png")
+            species_img = cv2.cvtColor(species_img, cv2.COLOR_BGR2RGB)
+            orig_img = cv2.imread(temp_path)
+            orig_img = cv2.cvtColor(orig_img, cv2.COLOR_BGR2RGB)
 
-            # Resize original image
+            # Resize original image to match species-clustered image
             species_h, species_w, _ = species_img.shape
-            orig_resized = np.array(
-                Image.fromarray(orig_img).resize((species_w, species_h))
-            )
+            orig_resized = cv2.resize(orig_img, (species_w, species_h))
 
             # Display side by side
             col_orig, col_species = st.columns(2)
@@ -173,15 +169,17 @@ if uploaded_files:
             with col_species:
                 st.image(species_img, caption="Species / Cluster Visualization")
 
-            # Species legend
+            # Species legend with counts
             species_counts = result.get("species_count", {})
             unique_species = list(species_counts.keys())
+            n_clusters = len(unique_species)
+            cmap = plt.get_cmap('tab10', n_clusters)
 
             legend_html = "<div style='display:flex; gap:15px; flex-wrap: wrap; margin-top:10px;'>"
-            for species_name in unique_species:
+            for i, species_name in enumerate(unique_species):
                 count = species_counts[species_name]
                 hex_color = result["labels"][species_name]
-
+                print(hex_color)
                 legend_html += (
                     f"<div style='display:flex; align-items:center; gap:5px;'>"
                     f"<div style='width:20px; height:20px; background: rgb{hex_color}; border:1px solid #000'></div>"
@@ -192,7 +190,7 @@ if uploaded_files:
 
             st.markdown(legend_html, unsafe_allow_html=True)
 
-# ---------------- FOOTER ---------------- #
+# ---------------- FOOTER CREDIT ---------------- #
 st.markdown("""
 <div class='footer'>
 EcoVision AI • Created by <b>Team Shooting Stars</b>
